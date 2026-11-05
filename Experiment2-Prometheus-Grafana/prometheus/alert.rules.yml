@@ -1,0 +1,77 @@
+# =============================================================================
+# Prometheus Alert Rules
+# DevOps Lab 3 | Student: Kartik Kumar | Roll: 2301730205
+# =============================================================================
+
+groups:
+  - name: infrastructure_alerts
+    rules:
+      # High CPU usage alert
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          student: kartik-kumar
+          roll: "2301730205"
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes on {{ $labels.instance }}"
+
+      # High Memory usage alert
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          student: kartik-kumar
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% on {{ $labels.instance }}"
+
+      # Disk space alert
+      - alert: LowDiskSpace
+        expr: (node_filesystem_free_bytes / node_filesystem_size_bytes) * 100 < 10
+        for: 10m
+        labels:
+          severity: critical
+          student: kartik-kumar
+        annotations:
+          summary: "Low disk space"
+          description: "Disk usage is above 90% on {{ $labels.instance }} ({{ $labels.mountpoint }})"
+
+      # Service down alert
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          student: kartik-kumar
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} has been down for more than 1 minute"
+
+  - name: application_alerts
+    rules:
+      # High HTTP error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          student: kartik-kumar
+        annotations:
+          summary: "High HTTP error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.job }}"
+
+      # High response time
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          student: kartik-kumar
+        annotations:
+          summary: "Slow response time detected"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}"
+

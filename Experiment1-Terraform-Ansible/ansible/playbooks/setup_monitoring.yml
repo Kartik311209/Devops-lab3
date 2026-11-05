@@ -1,0 +1,124 @@
+---
+# =============================================================================
+# Ansible Playbook - Monitoring Setup
+# DevOps Lab 3 | Student: Kartik Kumar | Roll: 2301730205
+# =============================================================================
+- name: Setup Monitoring Stack
+  hosts: monitoring
+  become: yes
+  gather_facts: yes
+
+  vars:
+    student_name: "Kartik Kumar"
+    roll_number: "2301730205"
+    prometheus_version: "2.47.0"
+    grafana_version: "10.1.0"
+    prometheus_port: 9090
+    grafana_port: 3000
+
+  tasks:
+    - name: Create prometheus user
+      user:
+        name: prometheus
+        system: yes
+        shell: /bin/false
+        home: /var/lib/prometheus
+
+    - name: Create prometheus directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: prometheus
+        group: prometheus
+        mode: '0755'
+      loop:
+        - /etc/prometheus
+        - /var/lib/prometheus
+        - /tmp/prometheus
+
+    - name: Download and extract Prometheus
+      unarchive:
+        src: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz"
+        dest: /tmp/prometheus
+        remote_src: yes
+        creates: "/tmp/prometheus/prometheus-{{ prometheus_version }}.linux-amd64"
+
+    - name: Install Prometheus binaries
+      copy:
+        src: "/tmp/prometheus/prometheus-{{ prometheus_version }}.linux-amd64/{{ item }}"
+        dest: "/usr/local/bin/{{ item }}"
+        remote_src: yes
+        mode: '0755'
+        owner: root
+        group: root
+      loop:
+        - prometheus
+        - promtool
+
+    - name: Configure Prometheus
+      template:
+        src: templates/prometheus.yml.j2
+        dest: /etc/prometheus/prometheus.yml
+        owner: prometheus
+        group: prometheus
+        mode: '0644'
+      notify: Restart prometheus
+
+    - name: Create Prometheus systemd service
+      template:
+        src: templates/prometheus.service.j2
+        dest: /etc/systemd/system/prometheus.service
+        mode: '0644'
+      notify:
+        - Reload systemd
+        - Restart prometheus
+
+    - name: Add Grafana apt repository
+      block:
+        - apt_key:
+            url: https://packages.grafana.com/gpg.key
+            state: present
+        - apt_repository:
+            repo: "deb https://packages.grafana.com/oss/deb stable main"
+            state: present
+
+    - name: Install Grafana
+      apt:
+        name: grafana
+        state: present
+        update_cache: yes
+
+    - name: Configure Grafana
+      template:
+        src: templates/grafana.ini.j2
+        dest: /etc/grafana/grafana.ini
+        mode: '0640'
+        owner: grafana
+        group: grafana
+      notify: Restart grafana
+
+    - name: Start Prometheus and Grafana
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+        daemon_reload: yes
+      loop:
+        - prometheus
+        - grafana-server
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart prometheus
+      systemd:
+        name: prometheus
+        state: restarted
+
+    - name: Restart grafana
+      systemd:
+        name: grafana-server
+        state: restarted
+

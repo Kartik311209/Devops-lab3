@@ -1,0 +1,157 @@
+---
+# =============================================================================
+# Ansible Playbook - WebServer Configuration
+# DevOps Lab 3 | Student: Kartik Kumar | Roll: 2301730205
+# =============================================================================
+- name: Configure Web Servers
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  vars:
+    student_name: "Kartik Kumar"
+    roll_number: "2301730205"
+    app_name: "devops-lab3-app"
+    app_port: 8080
+    nginx_version: "latest"
+
+  pre_tasks:
+    - name: Display provisioning info
+      debug:
+        msg: |
+          ==========================================
+          Student  : {{ student_name }}
+          Roll No  : {{ roll_number }}
+          Hostname : {{ inventory_hostname }}
+          Environment: {{ environment | default('development') }}
+          ==========================================
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+  tasks:
+    - name: Install required packages
+      package:
+        name:
+          - nginx
+          - curl
+          - wget
+          - git
+          - htop
+          - vim
+          - ufw
+        state: present
+
+    - name: Ensure nginx is started and enabled
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Configure nginx virtual host
+      template:
+        src: templates/nginx_vhost.conf.j2
+        dest: /etc/nginx/sites-available/{{ app_name }}
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload nginx
+
+    - name: Enable nginx site
+      file:
+        src: /etc/nginx/sites-available/{{ app_name }}
+        dest: /etc/nginx/sites-enabled/{{ app_name }}
+        state: link
+      notify: Reload nginx
+
+    - name: Configure UFW firewall
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - "22"
+        - "80"
+        - "{{ app_port }}"
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+        policy: deny
+
+    - name: Deploy application health check endpoint
+      copy:
+        content: |
+          {
+            "status": "healthy",
+            "app": "{{ app_name }}",
+            "student": "{{ student_name }}",
+            "roll_number": "{{ roll_number }}",
+            "server": "{{ inventory_hostname }}",
+            "timestamp": "{{ ansible_date_time.iso8601 }}"
+          }
+        dest: /var/www/html/health.json
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Create application index page
+      template:
+        src: templates/index.html.j2
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Configure system limits
+      pam_limits:
+        domain: "*"
+        limit_type: "-"
+        limit_item: nofile
+        value: "65536"
+
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Create deployment marker
+      copy:
+        content: |
+          Deployed by Ansible
+          Student: {{ student_name }}
+          Roll: {{ roll_number }}
+          Date: {{ ansible_date_time.date }}
+          Server: {{ inventory_hostname }}
+        dest: /etc/ansible_deployment
+        mode: '0644'
+
+  handlers:
+    - name: Reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
+
+  post_tasks:
+    - name: Verify nginx is running
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+
+    - name: Display nginx status
+      debug:
+        msg: "Nginx status: {{ nginx_test.rc == 0 | ternary('OK', 'FAILED') }}"
+
+    - name: Check application health endpoint
+      uri:
+        url: "http://localhost:80/health.json"
+        return_content: yes
+      register: health_check
+      ignore_errors: yes
+
+    - name: Display health check result
+      debug:
+        msg: "Health check: {{ health_check.status | default('failed') }}"
+

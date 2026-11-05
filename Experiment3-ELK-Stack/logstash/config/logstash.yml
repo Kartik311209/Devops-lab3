@@ -1,0 +1,11 @@
+http.host: "0.0.0.0"
+path.config: /usr/share/logstash/pipeline
+path.logs: /var/log/logstash
+log.level: info
+
+monitoring.enabled: false
+
+pipeline.workers: 2
+pipeline.batch.size: 125
+pipeline.batch.delay: 50
+

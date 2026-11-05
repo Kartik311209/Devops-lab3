@@ -1,0 +1,50 @@
+filebeat.inputs:
+  # Docker container logs
+  - type: container
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+      - add_fields:
+          target: ''
+          fields:
+            student_name: "Kartik Kumar"
+            roll_number: "2301730205"
+            project: devops-lab3
+
+  # Application log files
+  - type: log
+    enabled: true
+    paths:
+      - /app-logs/*.log
+      - /app-logs/*.json
+    json.keys_under_root: true
+    json.add_error_key: true
+    tags: ["app-logs", "devops-lab3"]
+    fields:
+      log_type: application
+      student: kartik-kumar
+    fields_under_root: true
+
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+output.logstash:
+  hosts: ["logstash:5044"]
+  loadbalance: true
+
+setup.kibana:
+  host: "kibana:5601"
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0640
+

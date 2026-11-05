@@ -1,0 +1,44 @@
+========================================================
+TERRAFORM PROVISIONING SUMMARY
+========================================================
+Project Name   : devops-lab3-kartik
+Student        : Kartik Kumar
+Roll Number    : 2301730205
+Email          : kartikjangra5366@gmail.com
+Environment    : development
+Deployment ID  : 1f3678f4
+Provisioned At : 2026-11-05 14:50:19 UTC
+========================================================
+
+INFRASTRUCTURE PROVISIONED:
+---------------------------
+Web Servers    : 2 instances (10.0.1.10, 10.0.2.10)
+DB Server      : 1 instance  (10.0.10.10 - PostgreSQL 15)
+Monitoring     : 1 instance  (10.0.20.10 - Prometheus + Grafana)
+
+NETWORK CONFIGURATION:
+----------------------
+VPC CIDR       : 10.0.0.0/16
+Subnet CIDR    : 10.0.0.0/24
+App Port       : 8080
+Region         : ap-south-1 (Mumbai, India)
+
+RESOURCES CREATED BY TERRAFORM:
+--------------------------------
+  [+] random_id.deployment_id
+  [+] local_file.infrastructure_config  -> output/infrastructure.json
+  [+] local_file.ansible_inventory      -> output/ansible_inventory.ini
+  [+] local_file.env_config             -> output/.env
+  [+] local_file.terraform_outputs      -> output/terraform_summary.txt
+  [+] local_file.docker_compose         -> output/docker-compose.yml
+  [+] null_resource.infrastructure_validation
+
+TERRAFORM OUTPUTS:
+------------------
+  deployment_id         = "1f3678f4"
+  app_endpoint          = "http://localhost:8080"
+  monitoring_endpoint   = "http://10.0.20.10:9090"
+  web_server_ips        = ["10.0.1.10", "10.0.2.10"]
+
+STATUS: PROVISIONED SUCCESSFULLY
+========================================================

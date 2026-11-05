@@ -1,0 +1,64 @@
+{
+  "report_title": "Browser Test Report - DevOps Lab 3",
+  "student": {
+    "name": "Kartik Kumar",
+    "roll": "2301730205",
+    "email": "kartikjangra5366@gmail.com"
+  },
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "pass_rate": "100%",
+  "results": [
+    {
+      "name": "TC001_Homepage_Accessible",
+      "desc": "Homepage returns HTTP 200",
+      "status": "PASS"
+    },
+    {
+      "name": "TC002_Health_Check_Pass",
+      "desc": "Health endpoint returns healthy status",
+      "status": "PASS"
+    },
+    {
+      "name": "TC003_Metrics_Available",
+      "desc": "Prometheus metrics endpoint returns data",
+      "status": "PASS"
+    },
+    {
+      "name": "TC004_API_Info_Returns_JSON",
+      "desc": "API info endpoint returns student data",
+      "status": "PASS"
+    },
+    {
+      "name": "TC005_API_Data_Returns_Content",
+      "desc": "API data endpoint returns JSON data",
+      "status": "PASS"
+    },
+    {
+      "name": "TC006_Response_Time_OK",
+      "desc": "Homepage responds within 3 seconds",
+      "status": "PASS"
+    },
+    {
+      "name": "TC007_404_Returns_Response",
+      "desc": "Non-existent URL returns a response",
+      "status": "PASS"
+    },
+    {
+      "name": "TC008_Student_Info_Present",
+      "desc": "Application contains student info",
+      "status": "PASS"
+    },
+    {
+      "name": "TC009_Health_Status_Field",
+      "desc": "Health response has status field",
+      "status": "PASS"
+    },
+    {
+      "name": "TC010_Metrics_Contains_App",
+      "desc": "Metrics contain app_info gauge",
+      "status": "PASS"
+    }
+  ]
+}

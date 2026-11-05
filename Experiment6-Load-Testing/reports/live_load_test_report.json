@@ -1,0 +1,15 @@
+{
+  "report_title": "Load Test Report - DevOps Lab 3",
+  "student": {
+    "name": "Kartik Kumar",
+    "roll": "2301730205"
+  },
+  "total": 7261,
+  "successful": 7261,
+  "failed": 0,
+  "rps": 238.88,
+  "avg_ms": 53.04,
+  "p50": 3.26,
+  "p95": 512.85,
+  "p99": 1018.26
+}

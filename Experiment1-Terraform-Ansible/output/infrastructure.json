@@ -1,0 +1,52 @@
+{
+  "project": "devops-lab3-kartik",
+  "student": "Kartik Kumar",
+  "roll_number": "2301730205",
+  "environment": "development",
+  "deployment_id": "1f3678f4",
+  "timestamp": "2026-11-05T14:50:19.945347Z",
+  "servers": {
+    "web_servers": [
+      {
+        "name": "web-server-1-1f3678f4",
+        "ip": "10.0.1.10",
+        "port": 8080,
+        "role": "web",
+        "status": "provisioned"
+      },
+      {
+        "name": "web-server-2-1f3678f4",
+        "ip": "10.0.2.10",
+        "port": 8080,
+        "role": "web",
+        "status": "provisioned"
+      }
+    ],
+    "db_server": {
+      "name": "db-server-1f3678f4",
+      "ip": "10.0.10.10",
+      "port": 5432,
+      "role": "database",
+      "status": "provisioned"
+    },
+    "monitoring_server": {
+      "name": "monitoring-1f3678f4",
+      "ip": "10.0.20.10",
+      "port": 9090,
+      "role": "monitoring",
+      "status": "provisioned"
+    }
+  },
+  "network": {
+    "vpc_cidr": "10.0.0.0/16",
+    "subnet_cidr": "10.0.0.0/24",
+    "region": "ap-south-1"
+  },
+  "tags": {
+    "Project": "devops-lab3-kartik",
+    "Environment": "development",
+    "ManagedBy": "Terraform",
+    "Student": "Kartik Kumar",
+    "RollNumber": "2301730205"
+  }
+}

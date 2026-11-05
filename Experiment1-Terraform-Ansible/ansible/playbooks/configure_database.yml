@@ -1,0 +1,99 @@
+---
+# =============================================================================
+# Ansible Playbook - Database Configuration
+# DevOps Lab 3 | Student: Kartik Kumar | Roll: 2301730205
+# =============================================================================
+- name: Configure Database Server
+  hosts: databases
+  become: yes
+  gather_facts: yes
+
+  vars:
+    student_name: "Kartik Kumar"
+    roll_number: "2301730205"
+    db_name: "devopslab3_db"
+    db_user: "devops_user"
+    db_password: "DevOps@2024"
+    postgres_version: "15"
+
+  tasks:
+    - name: Install PostgreSQL
+      package:
+        name:
+          - postgresql
+          - postgresql-contrib
+          - python3-psycopg2
+          - libpq-dev
+        state: present
+
+    - name: Ensure PostgreSQL is started
+      systemd:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: Create application database
+      become_user: postgres
+      postgresql_db:
+        name: "{{ db_name }}"
+        state: present
+
+    - name: Create database user
+      become_user: postgres
+      postgresql_user:
+        db: "{{ db_name }}"
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        priv: ALL
+        state: present
+
+    - name: Configure PostgreSQL to listen on all interfaces
+      lineinfile:
+        path: /etc/postgresql/{{ postgres_version }}/main/postgresql.conf
+        regexp: "^#?listen_addresses"
+        line: "listen_addresses = '*'"
+      notify: Restart postgresql
+
+    - name: Configure pg_hba for remote access
+      blockinfile:
+        path: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+        block: |
+          # DevOps Lab 3 - Remote access
+          host    {{ db_name }}    {{ db_user }}    10.0.0.0/8    md5
+        marker: "# {mark} DEVOPS LAB 3 BLOCK"
+      notify: Restart postgresql
+
+    - name: Create database schema
+      become_user: postgres
+      postgresql_query:
+        db: "{{ db_name }}"
+        query: |
+          CREATE TABLE IF NOT EXISTS deployments (
+            id SERIAL PRIMARY KEY,
+            deployment_id VARCHAR(50) UNIQUE NOT NULL,
+            student_name VARCHAR(100) NOT NULL,
+            roll_number VARCHAR(20) NOT NULL,
+            environment VARCHAR(20) NOT NULL,
+            status VARCHAR(20) DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE TABLE IF NOT EXISTS metrics (
+            id SERIAL PRIMARY KEY,
+            server_name VARCHAR(100) NOT NULL,
+            metric_name VARCHAR(100) NOT NULL,
+            metric_value FLOAT NOT NULL,
+            recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          INSERT INTO deployments (deployment_id, student_name, roll_number, environment)
+          VALUES ('deploy-kartik-001', '{{ student_name }}', '{{ roll_number }}', 'development')
+          ON CONFLICT (deployment_id) DO NOTHING;
+
+  handlers:
+    - name: Restart postgresql
+      systemd:
+        name: postgresql
+        state: restarted
+

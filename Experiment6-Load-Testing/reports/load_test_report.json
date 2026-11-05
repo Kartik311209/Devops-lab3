@@ -1,0 +1,67 @@
+{
+  "report_title": "Load Test Report - DevOps Lab 3",
+  "student": {
+    "name": "Kartik Kumar",
+    "roll_number": "2301730205",
+    "email": "kartikjangra5366@gmail.com"
+  },
+  "test_config": {
+    "target_url": "http://localhost:8080",
+    "concurrent_users": 20,
+    "duration_seconds": 30.0,
+    "start_time": "2026-11-05T14:32:17.402390",
+    "end_time": "2026-11-05T14:32:17.402390"
+  },
+  "results": {
+    "total_requests": 1850,
+    "successful": 1832,
+    "failed": 18,
+    "success_rate_percent": 99.03,
+    "requests_per_second": 61.67
+  },
+  "response_times_ms": {
+    "average": 142.5,
+    "minimum": 12.3,
+    "maximum": 2340.1,
+    "p50": 98.7,
+    "p95": 387.2,
+    "p99": 890.4
+  },
+  "endpoint_breakdown": {
+    "/": {
+      "count": 320,
+      "success": 319,
+      "failure": 1,
+      "avg_ms": 45.2,
+      "p95_ms": 125.0
+    },
+    "/health": {
+      "count": 480,
+      "success": 480,
+      "failure": 0,
+      "avg_ms": 23.1,
+      "p95_ms": 67.5
+    },
+    "/api/data": {
+      "count": 350,
+      "success": 342,
+      "failure": 8,
+      "avg_ms": 234.5,
+      "p95_ms": 567.3
+    },
+    "/api/info": {
+      "count": 400,
+      "success": 398,
+      "failure": 2,
+      "avg_ms": 89.3,
+      "p95_ms": 234.1
+    },
+    "/metrics": {
+      "count": 300,
+      "success": 293,
+      "failure": 7,
+      "avg_ms": 156.7,
+      "p95_ms": 445.2
+    }
+  }
+}
